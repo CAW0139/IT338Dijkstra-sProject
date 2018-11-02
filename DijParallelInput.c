@@ -1,30 +1,33 @@
 #include<stdio.h>
 #define max 20
 
-int adj[max][max]; /*Adjacency matrix */
-int n;    /* Denotes number of nodes in the graph */
-main()
+int adj[max][max];
+int n;
+int main()
 {
         int max_edges,i,j,origin,destin;
         char graph_type;
-        printf("Enter number of nodes : ");
-        scanf("%d",&n);
-        printf("Enter type of graph, directed or undirected (d/u) : ");
+	char * fileName;
+        
+	printf("Enter file name of input: ");
+        scanf("%s",fileName);
+
         fflush(stdin);
-        scanf("%c",&graph_type);
 
-        if(graph_type=='u')
-                max_edges=n*(n-1)/2;
-        else
-                max_edges=n*(n-1);
+	FILE *fileptr;
+	fileptr = fopen(fileName, "r");
+	fscanf(fileptr, "%c\n", &graph_type);
+	fscanf(fileptr, "%d %d\n", &n, &max_edges); 
 
-        for(i=1;i<=max_edges;i++)
-        {
-                printf("Enter edge %d( 0 0 to quit ) : ",i);
-                scanf("%d %d",&origin,&destin);
-                if( (origin==0) && (destin==0) )
+	printf("Number of Nodes: %d \nNumber of Edges: %d\nType of Graph: %c\n", n, max_edges, graph_type);	
+//	int adj[n][n];	
+	for(i=1;i<=max_edges;i++)
+        {     
+                fscanf(fileptr, "%d %d\n",&origin,&destin);
+       //       	printf("Pair: %d %d\n", origin, destin); 
+		 if( (origin==0) && (destin==0) )
                         break;
-                if( origin > n || destin > n || origin<=0 || destin<=0)
+                if( origin >= n || destin >= n || origin<0 || destin<0)
                 {
                         printf("Invalid edge!\n");
                         i--;
@@ -38,10 +41,11 @@ main()
         }/*End of for*/
 
         printf("The adjacency matrix is :\n");
-        for(i=1;i<=n;i++)
+        for(i=0;i<n;i++)
         {
-                for(j=1;j<=n;j++)
+                for(j=0;j<n;j++)
                         printf("%4d",adj[i][j]);
                 printf("\n");
         }
+	return 0;
 }
