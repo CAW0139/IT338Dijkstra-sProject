@@ -19,7 +19,7 @@ int main()
 	fscanf(fileptr, "%c\n", &graph_type);
 	fscanf(fileptr, "%d %d\n", &n, &max_edges); 
 
-	printf("Number of Nodes: %d \nNumber of Edges: %d\nType of Graph: %c\n", n, max_edges, graph_type);	
+//	printf("Number of Nodes: %d \nNumber of Edges: %d\nType of Graph: %c\n", n, max_edges, graph_type);	
 //	int adj[n][n];	
 	for(i=1;i<=max_edges;i++)
         {     
@@ -39,13 +39,17 @@ int main()
                                 adj[destin][origin]=1;
                 }
         }/*End of for*/
-
-        printf("The adjacency matrix is :\n");
-        for(i=0;i<n;i++)
+	FILE *adjOut;
+	adjOut = fopen("adjOut.txt", "w");
+  //      printf("The adjacency matrix is :\n");
+   	fprintf(adjOut, "%d\n", n);
+	for(i=0;i<n;i++)
         {
                 for(j=0;j<n;j++)
-                        printf("%4d",adj[i][j]);
-                printf("\n");
+                        fprintf(adjOut,"%4d",adj[i][j]);
+                fprintf(adjOut, "\n");
         }
+	fclose(fileptr);
+	fclose(adjOut);	
 	return 0;
 }
