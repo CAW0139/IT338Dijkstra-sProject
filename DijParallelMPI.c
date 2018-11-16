@@ -43,6 +43,7 @@ void Read_matrix(int loc_mat[], int loc_n, MPI_Datatype blk_col_mpi_t, int my_ra
 int adj[MAX_SIZE][MAX_SIZE];
 int n;
 char graph_type;
+FILE *fileptr;
 
 int main(int argc, char* argv[])
 {
@@ -112,13 +113,11 @@ int Read_n(int my_rank, MPI_Comm comm)
 		if (scanf("%s", filenameptr) == 0)
 			printf("did not read correctly\n");
 		printf("Opening file\nFilename: ");
-		FILE *fileptr = fopen(filename, "r");
+		fileptr = fopen(filename, "r");
 		printf(filename);
 		printf("\nReading file\n");
-		fscanf(fileptr, "%d\n", &n);
+		fscanf(fileptr, "%d", &n);
 		printf("n = %d\n", n);
-		printf("Closing file\n");
-		fclose(fileptr);
 	}
 	
     MPI_Bcast(&n, 1, MPI_INT, 0, comm);
@@ -173,41 +172,19 @@ MPI_Datatype Build_blk_col_type(int n, int loc_n)
 void Read_matrix(int loc_mat[], int loc_n, MPI_Datatype blk_col_mpi_t, int my_rank, MPI_Comm comm)
 {
     int* mat = NULL, i, j;
-	char filename[30];
-	char *filenameptr = filename;
-    
-	printf("my_rank: %d\n", my_rank);
 	
     if (my_rank == 0)
 	{
-		printf("Enter filename of input: ");
-			scanf("%s", filenameptr);
-
-		printf("filename: %s\n", filename);
-		printf("Reading file\n");
-		FILE *fileptr = fopen(filename, "r");
-		/*if (fileptr == NULL)
+		printf("Reading matrix\n");
+		mat = malloc(n*n*sizeof(int));
+		for (i = 0; i < n; i++)
 		{
-			printf("Unable to open file %s. Exiting now\n", filename);
-			exit(0);
-		}
-		else
-		{*/
-		printf("filename: %s", filename);
-			fscanf(fileptr, "%d", &i);
-			printf("Reading matrix\n");
-			mat = malloc(n*n*sizeof(int));
-			for (i = 0; i < n; i++)
+			for (j = 0; j < n; j++)
 			{
-				for (j = 0; j < n; j++)
-				{
-					fscanf(fileptr, "%d", &mat[i*n + j]);
-					printf("mat[%d] %d\n", i*n+j, mat[i*n+j]);
-				}
-				
+				fscanf(fileptr, "%d", &mat[i*n + j]);
+				printf("mat[%d] %d\n", i*n+j, mat[i*n+j]);
 			}
-		//}
-		
+		}
 		fclose(fileptr);
     }
     
