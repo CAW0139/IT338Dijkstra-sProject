@@ -103,18 +103,19 @@ int main(int argc, char* argv[])
 int Read_n(int my_rank, MPI_Comm comm)
 {
     int n;
-	char filename[30];
-	char *filenameptr = filename;
+	char *filename;
     
     if (my_rank == 0)
 	{
 		printf("Enter filename of input: ");
 		fflush(stdout);
-		if (scanf("%s", filenameptr) == 0)
+		if (scanf("%s", &filename) == 0)
+		{
 			printf("did not read correctly\n");
+			exit(0);
+		}
 		printf("Opening file\nFilename: ");
-		fileptr = fopen(filename, "r");
-		printf(filename);
+		fileptr = fopen(&filename, "r");
 		printf("\nReading file\n");
 		fscanf(fileptr, "%d", &n);
 		printf("n = %d\n", n);
@@ -175,6 +176,7 @@ void Read_matrix(int loc_mat[], int loc_n, MPI_Datatype blk_col_mpi_t, int my_ra
 	
     if (my_rank == 0)
 	{
+		fflush(stdout);
 		printf("Reading matrix\n");
 		mat = malloc(n*n*sizeof(int));
 		for (i = 0; i < n; i++)
@@ -182,13 +184,13 @@ void Read_matrix(int loc_mat[], int loc_n, MPI_Datatype blk_col_mpi_t, int my_ra
 			for (j = 0; j < n; j++)
 			{
 				fscanf(fileptr, "%d", &mat[i*n + j]);
-				printf("mat[%d] %d\n", i*n+j, mat[i*n+j]);
+//				printf("mat[%d] %d\n", i*n+j, mat[i*n+j]);
 			}
 		}
 		fclose(fileptr);
     }
     
-	printf("my_rank: %d\n", my_rank);
+//	printf("my_rank: %d\n", my_rank);
     MPI_Scatter(mat, 1, blk_col_mpi_t, loc_mat, n*loc_n, MPI_INT, 0, comm);
     
     if (my_rank == 0) free(mat);
