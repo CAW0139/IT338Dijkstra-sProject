@@ -45,6 +45,9 @@ int main(int argc, char* argv[])
 	
 	Dijkstra(matrix, source, dest);
 	
+	# pragma omp parallel for num_threads(thread_count)
+	for (i=0; i<size; i++)
+		free(matrix[i]);
 	return 1;
 }	/* end main */
 
