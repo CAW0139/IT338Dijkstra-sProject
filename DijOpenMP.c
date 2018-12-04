@@ -1,27 +1,35 @@
+/**
+ * File: DijOpenMP.c
+ * Authors: Cody Ponder, Cain Wock, Matthew Hill, Deidre Brennan
+ * Class: IT388 - Introduction to Parallel Processing Resources
+ * Professor: Dr. Follmann
+ *
+ * Comile: gcc -g -Wall -fopenmp -o OpenMP DijOpenMP.c
+ * Run: ./OpenMP <number of threads> <file of matrix> <starting node> <destination node>
+ **/
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <omp.h>
 #include <time.h>
+#include <omp.h>
 
 #define INFINITY 9999
 
-void Read_size();
 void Read_matrix(int **matrix);
-void Dijkstra(int **matrix, int source, int dest);
+void Usage(int argc, char* argv[]);
 int Find_min_dist(int dist[], bool visited[]);
+void Dijkstra(int **matrix, int source, int dest);
 void Print_path(int dist[], int source, int dest);
 
-int size = 0, thread_count = 0, source = 0, dest = -1;
 FILE *fileptr;
+char *filename = NULL;
+int size = 0, thread_count = 0, source = 0, dest = 0;
 
 int main(int argc, char* argv[])
 {
-	if (argc < 2)
-	{
-		printf("Expecting number of threads. Exiting\n");
-		exit(0);
-	}
+	Usage(argc, argv);
+	filename = argv[2];
 	
 	int thread_count = strtol(argv[1], NULL, 10);
 	
@@ -31,48 +39,89 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-	Read_size();
+	// Gets the size of the matrix
+	fileptr = fopen(filename, "r");
+	fscanf(fileptr, "%d", &size);
+	
+	if (dest > size)
+	{
+		printf("The destination cannot be larger than the size of the matrix. Exiting\n");
+		exit(0);
+	}
+	
+	if (dest == 0 && source == 0)
+		dest = size-1;
 	
 	int *matrix[size], i;
-	clock_t t;
-	t = clock();
+	clock_t t = clock();
+	
 	# pragma omp parallel for num_threads(thread_count)
 	for (i=0; i<size; i++)
 		matrix[i] = (int*)malloc(size*sizeof(int));
 	
 	Read_matrix(matrix);
 	
-	//Just to view the final destination's distance
-	dest = 4;
-	
 	Dijkstra(matrix, source, dest);
 	t = clock() - t;
-		double time_taken = ((double)t) / CLOCKS_PER_SEC;
-	printf("program took %f seconds to execute \n", time_taken);
+	double time_taken = ((double)t) / CLOCKS_PER_SEC;
+	printf("The program took %f seconds to execute.\n", time_taken);
+	
 	# pragma omp parallel for num_threads(thread_count)
 	for (i=0; i<size; i++)
 		free(matrix[i]);
+	
 	return 1;
 }	/* end main */
 
 /*
- * Reads the first line in the matrix file to get the number of verticies
- * and thus the size of the double array to create
+ * If-Else statements about # of threads, file to open,
+ * source node, and destination node. In own function to
+ * clean up main a little bit.
  */
-void Read_size()
+void Usage(int argc, char* argv[])
 {
-	char *filename = "matrix";
-	
-	/*printf("Enter filename of input: ");
-	if (scanf("%s", &filename) == 0)
+	if (argc < 2)
 	{
-		printf("Did not set the filename correctly\n");
+		printf("Expecting number of threads. Exiting\n");
+		printf("file\t# threads\tsource node\tdestination node\n");
 		exit(0);
-	}*/
-	
-	fileptr = fopen(filename, "r");
-	fscanf(fileptr, "%d", &size);
-}	/* end Read_size */
+	}
+	else if (argc < 3)
+	{
+		printf("Expecting a matrix file to open. Exiting\n");
+		printf("file\t# threads\tsource node\tdestination node\n");
+		exit(0);
+	}
+	else if (argc < 4)
+	{
+		printf("No source node or destination is set. Will default to 0 for source and last node for destination.\n");
+		printf("file\t# threads\tsource node\tdestination node\n");
+	}
+	else if (argc < 5)
+	{
+		source = strtol(argv[3], NULL, 10);
+		
+		if (source<0)
+		{
+			printf("The source cannot be less than 0. Exiting\n");
+			exit(0);
+		}
+		
+		printf("No destination is set. Will default to the last node.\n");
+		printf("file\t# threads\tsource node\tdestination node\n");
+	}
+	else
+	{
+		source = strtol(argv[3], NULL, 10);
+		dest = strtol(argv[4], NULL, 10);
+		
+		if (source<0 || dest<0)
+		{
+			printf("The source/destination cannot be less than 0. Exiting\n");
+			exit(0);
+		}
+	}
+}	/* end Usage */
 
 /*
  * Reads the remainder of the matrix file to create the double array (matrix)
@@ -88,12 +137,9 @@ void Read_matrix(int **matrix)
 			
 			fscanf(fileptr, "%d", &val);
 			matrix[i][j] = val;
-			printf("%d ", matrix[i][j]);
 		}
-		printf("\n");
 	}
 	
-	printf("\n");
 	fclose(fileptr);
 }	 /* end Read_matrix */
 
@@ -127,9 +173,9 @@ void Dijkstra(int **matrix, int source, int dest)
 		# pragma omp parallel for num_threads(thread_count)
 		for (j=0; j<size; j++)
 		{
-			//Update dist only if it is not visited, there is an edge from i to j,
+			//Update dist only if there is an edge from i to j,
 			//and that the total length of the path is less than the current value of dist[j]
-			if (!visited[j] && matrix[i][j] && dist[i] != INFINITY && dist[i]+matrix[i][j] < dist[j])
+			if (matrix[i][j] && dist[i] != INFINITY && dist[i]+matrix[i][j] < dist[j])
 			{
 				dist[j] = dist[i] + matrix[i][j];
 			}
@@ -171,8 +217,6 @@ void Print_path(int dist[], int source, int dest)
 	for (i=0; i<size; i++)
 		printf("%d \t %d\n", i, dist[i]);
 	
-	//Possible TODO - idk how to parallelize this (if possible because I can't figure
-	//	out how to get pragma omp critical to do multiple lines)
 	for (i=0; i<size; i++)
 	{
 		if (dist[i]<shortest && i!=source)
@@ -182,9 +226,9 @@ void Print_path(int dist[], int source, int dest)
 		}
 	}
 	
-	printf("\nThe shortest path is to node: %d at length: %d\n", short_index, shortest);
+	printf("The shortest path is to node: %d at length: %d\n", short_index, shortest);
 	if (dist[dest] != INFINITY)
 		printf("The destination's (%d) path length is: %d\n", dest, dist[dest]);
 	else
 		printf("The destination could not be reached however\n");
-}	/* end Print_path */
+} /* end Print_path */
