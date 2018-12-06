@@ -12,7 +12,7 @@ void init()
 {
 	int i, j;
 	
-	numV = 4;	
+	numV = 6474;	
 
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numNodes);
@@ -32,8 +32,10 @@ void init()
 			{
 				if(j == i)
 					graph[i*numV+j] = 0;
-				else
+				else{
 					graph[i*numV+j] = rand() % 21 + 1;
+					//printf("[%d] = %d\n", i*numV+j, graph[i*numV+j]);
+				}	
 			}
 
 	for(i = 0; i < numV; i++)
@@ -82,11 +84,11 @@ int main(int argc, char **argv)
 	if(myNode == 0)
 	{
 		endTime = MPI_Wtime();
-		for(k = 0; k < numV; k++)
+	/*	for(k = 0; k < numV; k++)
 		{
 			printf("node[%d] = %u\n", k, minDistance[k]);
 		}
-		printf("Time elapsed: %f\n", (float)(endTime - startTime));
+	*/	printf("Time elapsed: %f\n", (float)(endTime - startTime));
 	}
 	MPI_Finalize();
 	return 0;
