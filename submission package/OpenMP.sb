@@ -1,0 +1,69 @@
+#Authors: Cain Wock, Matthew Hill, Cody Ponder, Deirdre Brennan
+#Class: IT388 - Introduction To Parallel Procressing
+#Professor: Dr. Follmann
+
+#!/bin/bash                                                                   
+#SBATCH -A isu100                                                            
+#SBATCH --job-name="OpenMPTimes"
+#SBATCH --output="OpenMPTimes.out"
+#SBATCH --partition=compute                                                  
+#SBATCH --nodes=2    
+#SBATCH --ntasks-per-node=24                                                  
+#SBATCH --export=ALL                                                          
+#SBATCH -t 00:5:00
+
+#This job runs with 2 nodes, 24 cores per node for a total of 48 cores.       
+
+./OpenMP 1 matrix10 0 8
+./OpenMP 1 matrix20 0 8
+./OpenMP 1 matrix30 0 8
+./OpenMP 1 matrix40 0 8
+./OpenMP 1 matrix50 0 8
+./OpenMP 1 matrix100 0 8
+./OpenMP 1 matrix300 0 8
+./OpenMP 1 matrix500 0 8
+
+./OpenMP 2 matrix10 0 8
+./OpenMP 2 matrix20 0 8
+./OpenMP 2 matrix30 0 8
+./OpenMP 2 matrix40 0 8
+./OpenMP 2 matrix50 0 8
+./OpenMP 2 matrix100 0 8
+./OpenMP 2 matrix300 0 8
+./OpenMP 2 matrix500 0 8
+
+./OpenMP 4 matrix10 0 8
+./OpenMP 4 matrix20 0 8
+./OpenMP 4 matrix30 0 8
+./OpenMP 4 matrix40 0 8
+./OpenMP 4 matrix50 0 8
+./OpenMP 4 matrix100 0 8
+./OpenMP 4 matrix300 0 8
+./OpenMP 4 matrix500 0 8
+
+./OpenMP 8 matrix10 0 8
+./OpenMP 8 matrix20 0 8
+./OpenMP 8 matrix30 0 8
+./OpenMP 8 matrix40 0 8
+./OpenMP 8 matrix50 0 8
+./OpenMP 8 matrix100 0 8
+./OpenMP 8 matrix300 0 8
+./OpenMP 8 matrix500 0 8
+
+./OpenMP 12 matrix10 0 8
+./OpenMP 12 matrix20 0 8
+./OpenMP 12 matrix30 0 8
+./OpenMP 12 matrix40 0 8
+./OpenMP 12 matrix50 0 8
+./OpenMP 12 matrix100 0 8
+./OpenMP 12 matrix300 0 8
+./OpenMP 12 matrix500 0 8
+
+./OpenMP 16 matrix10 0 8
+./OpenMP 16 matrix20 0 8
+./OpenMP 16 matrix30 0 8
+./OpenMP 16 matrix40 0 8
+./OpenMP 16 matrix50 0 8
+./OpenMP 16 matrix100 0 8
+./OpenMP 16 matrix300 0 8
+./OpenMP 16 matrix500 0 8
